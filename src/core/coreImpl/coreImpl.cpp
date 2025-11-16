@@ -2,7 +2,6 @@
 
 namespace Core {
 namespace impl {
-
 const qsizetype CollatzProcessorImpl::s_CoresCount =
     QThread::idealThreadCount();
 std::vector<std::jthread> CollatzProcessorImpl::s_ThreadPool{
