@@ -8,10 +8,10 @@ namespace Ui {
 
 class Dialog;
 
-class UserInterface : public QDialog {
+class View : public QDialog {
   Q_OBJECT
  public:
-  UserInterface(QWidget* parent = nullptr) : QDialog{parent} {}
+  View(QWidget* parent = nullptr) : QDialog{parent} {}
  signals:
   void SendViewInfo(qsizetype CoresSelected, qsizetype UpperLimit);
   void on_btnStop_clicked();
@@ -21,7 +21,7 @@ class UserInterface : public QDialog {
   virtual void on_btnExit_clicked() noexcept = 0;
 };
 
-class MainDialog : public UserInterface {
+class MainDialog : public View {
   Q_OBJECT
 
  public:

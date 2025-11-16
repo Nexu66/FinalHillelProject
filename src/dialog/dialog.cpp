@@ -3,8 +3,7 @@
 #include "ui_dialog.h"
 
 namespace Ui {
-MainDialog::MainDialog(QWidget* parent)
-    : UserInterface{parent}, m_ui{new Ui::Dialog} {
+MainDialog::MainDialog(QWidget* parent) : View{parent}, m_ui{new Ui::Dialog} {
   m_ui->setupUi(this);
   m_ui->sliderThreadCountSelector->setMinimum(1);
   m_ui->sliderThreadCountSelector->setMaximum(QThread::idealThreadCount());
