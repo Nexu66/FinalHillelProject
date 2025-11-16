@@ -1,11 +1,8 @@
 #include "core.hpp"
 namespace Core {
-void CollatzProcessor::SetUpperLimit(qsizetype UpperLimit) noexcept {
-  this->m_currentUpperLimit = UpperLimit;
-  qInfo() << "ul:" << m_currentUpperLimit;
-}
-void CollatzProcessor::SetThreadLimit(qsizetype ThreadLimit) noexcept {
-  this->m_currentThreadLimit = ThreadLimit;
-  qInfo() << "tl:" << m_currentThreadLimit;
+void CollatzProcessor::StartProcessing(qsizetype CurrentThreadLimit,
+                                       qsizetype CurrentUpperLimit) noexcept {
+  qInfo() << "tl:" << CurrentThreadLimit << "ul:" << CurrentUpperLimit;
+  impl.StartProcessing(CurrentThreadLimit, CurrentUpperLimit);
 }
 }  // namespace Core

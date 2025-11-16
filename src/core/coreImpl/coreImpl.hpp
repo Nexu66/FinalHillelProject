@@ -1,4 +1,5 @@
 #pragma once
+#include <QDebug>
 #include <QList>
 #include <QThread>
 #include <atomic>
@@ -14,8 +15,8 @@ class CollatzProcessorImpl {
   static const qsizetype s_MaxSize;
   static std::atomic<int> element;
 
-  std::pair<int, int> StartProcessing(const qsizetype CurrentUpperLimit,
-                                      const qsizetype CurrentThreadLimit);
+  std::pair<int, int> StartProcessing(const qsizetype CurrentThreadLimit,
+                                      const qsizetype CurrentUpperLimit);
 };
 
 }  // namespace impl

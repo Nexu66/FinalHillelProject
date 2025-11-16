@@ -14,8 +14,8 @@ MainDialog::MainDialog(QWidget* parent)
 MainDialog::~MainDialog() { delete m_ui; }
 
 void MainDialog::on_btnStart_clicked() noexcept {
-  emit this->SendThreadLimit(m_ui->sliderThreadCountSelector->value());
-  emit this->SendUpperLimit(m_ui->spinBoxNumRange->value());
+  emit this->SendViewInfo(m_ui->sliderThreadCountSelector->value(),
+                          m_ui->spinBoxNumRange->value());
 }
 
 void MainDialog::on_btnExit_clicked() noexcept { this->close(); }

@@ -16,6 +16,8 @@ std::pair<int, int> CollatzProcessorImpl::StartProcessing(
   //   s_ThreadPool[i] = std::jthread{[&]() {
   //     // idk how to organize this
   //   }};
+  qInfo() << "Hellow";
+  return std::make_pair(1, 0);
 }
 }  // namespace impl
 }  // namespace Core

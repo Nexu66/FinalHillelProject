@@ -3,10 +3,8 @@
 namespace Ctrl {
 Controller::Controller(Ui::UserInterface* ui, Core::Model* mod)
     : m_ui{ui}, m_mod{mod} {
-  QObject::connect(m_ui.get(), &Ui::UserInterface::SendThreadLimit, m_mod.get(),
-                   &Core::Model::SetThreadLimit);
-  QObject::connect(m_ui.get(), &Ui::UserInterface::SendUpperLimit, m_mod.get(),
-                   &Core::Model::SetUpperLimit);
+  QObject::connect(m_ui.get(), &Ui::UserInterface::SendViewInfo, m_mod.get(),
+                   &Core::Model::StartProcessing);
 }
 
 void Controller::show() const noexcept { m_ui->show(); }
