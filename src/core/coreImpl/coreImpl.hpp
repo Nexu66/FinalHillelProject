@@ -14,16 +14,20 @@
 
 namespace Core {
 namespace impl {
+enum Signals { STOP = -1, OVERFLOW = -2 };
 class CollatzProcessorImpl {
  public:
+  bool is_Overflow = false;
   static const qsizetype s_CoresCount;
-  static const qsizetype s_MaxSize;
+  static const qsizetype s_MaxSize = std::numeric_limits<qsizetype>::max();
   static std::atomic<qsizetype> Elements;
   std::vector<std::pair<qsizetype, qsizetype>> ThreadResults;
   std::mutex ThreadResultsLock;
   static std::vector<std::jthread> s_ThreadPool;
   timer::Timer Timer;
 
+  void RequestStop();
+  bool WillOverflow(qsizetype current_element);
   std::pair<qsizetype, qsizetype> StartProcessing(
       std::stop_token stop, const qsizetype CurrentThreadLimit,
       const qsizetype CurrentUpperLimit);

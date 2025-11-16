@@ -19,6 +19,7 @@ class View : public QDialog {
       std::pair<qsizetype, qsizetype> CollatzResult,
       timer::Timer Time) noexcept = 0;
   virtual void DisplayStopMessage() noexcept = 0;
+  virtual void DisplayOverflowMessage() noexcept = 0;
  signals:
   void SendViewInfo(qsizetype CoresSelected, qsizetype UpperLimit);
   void on_btnStop_clicked();
@@ -44,6 +45,7 @@ class MainDialog : public View {
   void DisplayCollatzResult(std::pair<qsizetype, qsizetype> CollatzResult,
                             timer::Timer Timer) noexcept override;
   void DisplayStopMessage() noexcept override;
+  void DisplayOverflowMessage() noexcept override;
 
  public slots:
 

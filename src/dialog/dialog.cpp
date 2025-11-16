@@ -42,4 +42,10 @@ void MainDialog::DisplayStopMessage() noexcept {
   m_ui->btnStart->setEnabled(true);
 }
 
+void MainDialog::DisplayOverflowMessage() noexcept {
+  m_ui->leResult->setText(QStringLiteral("OVERFLOW!!!"));
+  m_ui->leTimeResult->setText(QStringLiteral("xxxxx.ms"));
+  m_ui->btnStart->setEnabled(true);
+}
+
 }  // namespace Ui

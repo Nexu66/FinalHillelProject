@@ -14,6 +14,7 @@ class Model : public QObject {
   void SendCollatzResult(std::pair<qsizetype, qsizetype> CollatzResult,
                          timer::Timer Time);
   void SendStopMessage();
+  void SendOverflowMessage();
 };
 
 class CollatzProcessor : public Model {
