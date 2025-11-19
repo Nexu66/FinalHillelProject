@@ -50,14 +50,15 @@ std::pair<qsizetype, qsizetype> CollatzProcessorImpl::CalculateCollatz(
   qsizetype original_element = current_element;
   qsizetype step_counter = 0;
   while (current_element != 1) {
-    if ((current_element & (current_element - 1)) == 0) {
-      return std::make_pair(original_element, step_counter);
-    }
     if (current_element % 2) {
       current_element = current_element * 3 + 1;
       if (WillOverflow(current_element))
         return std::make_pair(OVERFLOW, OVERFLOW);
     } else {
+      if ((current_element & (current_element - 1)) == 0) {
+        return std::make_pair(original_element,
+                              std::log2(current_element) + step_counter);
+      }
       current_element /= 2;
     }
     ++step_counter;
@@ -90,9 +91,9 @@ void CollatzProcessorImpl::Run(std::stop_token stop,
   qsizetype current_element = Elements++;
   std::pair<qsizetype, qsizetype> local_thread_result{1, 0};
 
+  std::pair<qsizetype, qsizetype> current_result;
   while (current_element <= CurrentUpperLimit) {
-    std::pair<qsizetype, qsizetype> current_result =
-        CalculateCollatz(current_element);
+    current_result = CalculateCollatz(current_element);
     if (current_result.first == Signals::OVERFLOW &&
         current_result.second == Signals::OVERFLOW) {
       RequestStop();
