@@ -21,7 +21,7 @@ class CollatzProcessorImpl {
   static const qsizetype s_CoresCount;
   static const qsizetype s_MaxSize = std::numeric_limits<qsizetype>::max();
   static std::atomic<qsizetype> Elements;
-  std::vector<std::pair<qsizetype, qsizetype>> ThreadResults;
+  std::vector<qsizetype> ThreadResults;
   std::mutex ThreadResultsLock;
   static std::vector<std::jthread> s_ThreadPool;
   static QHash<qsizetype, qsizetype> s_CalculatedValues;
@@ -29,13 +29,12 @@ class CollatzProcessorImpl {
 
   void RequestStop();
   bool WillOverflow(qsizetype current_element);
-  std::pair<qsizetype, qsizetype> StartProcessing(
-      std::stop_token stop, const qsizetype CurrentThreadLimit,
-      const qsizetype CurrentUpperLimit);
-  std::pair<qsizetype, qsizetype> CalculateCollatz(qsizetype current_element);
-  void SaveFinalThreadResult(
-      std::pair<qsizetype, qsizetype> final_thread_result);
-  std::pair<qsizetype, qsizetype> FindFinalResult();
+  qsizetype StartProcessing(std::stop_token stop,
+                            const qsizetype CurrentThreadLimit,
+                            const qsizetype CurrentUpperLimit);
+  qsizetype CalculateCollatz(qsizetype current_element);
+  void SaveFinalThreadResult(qsizetype final_thread_result);
+  qsizetype FindFinalResult();
   void Run(std::stop_token stop, const qsizetype CurrentUpperLimit);
 };
 
