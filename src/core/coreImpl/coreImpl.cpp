@@ -48,13 +48,13 @@ qsizetype CollatzProcessorImpl::CalculateCollatz(qsizetype current_element) {
   qsizetype original_element = current_element;
   qsizetype step_counter = 0;
   while (current_element != 1) {
+    if ((current_element & (current_element - 1)) == 0) {
+      return std::make_pair(original_element, step_counter);
+    }
     if (current_element % 2) {
       current_element = current_element * 3 + 1;
       if (WillOverflow(current_element)) return OVERFLOW;
     } else {
-      if ((current_element & (current_element - 1)) == 0) {
-        return std::log2(current_element) + step_counter;
-      }
       current_element /= 2;
     }
     ++step_counter;
