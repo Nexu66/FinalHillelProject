@@ -23,8 +23,8 @@ class CollatzProcessorImpl {
   static std::atomic<qsizetype> Elements;
   std::vector<qsizetype> ThreadResults;
   std::mutex ThreadResultsLock;
+  static QHash<qsizetype, qsizetype> s_PreCalculatedValues;
   static std::vector<std::jthread> s_ThreadPool;
-  static QHash<qsizetype, qsizetype> s_CalculatedValues;
   timer::Timer Timer;
 
   void RequestStop();
