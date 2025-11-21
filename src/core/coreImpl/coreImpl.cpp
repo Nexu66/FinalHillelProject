@@ -21,8 +21,7 @@ CollatzProcessorImpl::CollatzProcessorImpl() {
 
 CollatzProcessorImpl::~CollatzProcessorImpl() { qDeleteAll(s_Cache); }
 
-std::vector<std::pair<qsizetype, qsizetype> >
-    CollatzProcessorImpl::s_ThreadResults{};
+std::vector<ResultWrapper> CollatzProcessorImpl::s_ThreadResults{};
 
 void CollatzProcessorImpl::RequestStop() {
   s_ThreadPool.begin()->request_stop();
@@ -92,6 +91,11 @@ void CollatzProcessorImpl::CalculateCollatz(qsizetype current_element) {
   qsizetype original_element = current_element;
   qsizetype step_counter = 0;
   while (current_element > 1) {
+    if (current_element < s_Cache.size() &&
+        s_Cache[current_element - 1]->load() != 0) {
+      step_counter += s_Cache[current_element - 1]->load();
+      break;
+    }
     if (current_element % 2) {
       current_element = current_element * 3 + 1;
       if (WillOverflow(current_element)) this->RequestStop();
@@ -106,7 +110,7 @@ void CollatzProcessorImpl::CalculateCollatz(qsizetype current_element) {
 void CollatzProcessorImpl::SaveThreadResult(
     qsizetype result_element, qsizetype result_step_count,
     const qsizetype IndexInResultsVector) {
-  s_ThreadResults[IndexInResultsVector] =
+  s_ThreadResults[IndexInResultsVector].result =
       std::make_pair(result_element, result_step_count);
 }
 
@@ -114,12 +118,12 @@ std::pair<qsizetype, qsizetype> CollatzProcessorImpl::FindFinalResult() {
   qsizetype largest_count = 0;
   qsizetype number = 1;
   for (int i = 0; i < s_ThreadResults.size(); ++i) {
-    if (s_ThreadResults[i].second > largest_count) {
-      largest_count = s_ThreadResults[i].second;
-      number = s_ThreadResults[i].first;
+    if (s_ThreadResults[i].result.second > largest_count) {
+      largest_count = s_ThreadResults[i].result.second;
+      number = s_ThreadResults[i].result.first;
     }
   }
-  s_ThreadResults.assign(s_ThreadResults.size(), std::make_pair(0, 0));
+  s_ThreadResults.assign(s_ThreadResults.size(), ResultWrapper{});
   return std::make_pair(number, largest_count);
 }
 

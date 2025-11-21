@@ -14,6 +14,9 @@
 
 namespace Core {
 namespace impl {
+struct ResultWrapper {
+  alignas(64) std::pair<qsizetype, qsizetype> result{0, 0};
+};
 enum Signals { STOP = -1, VALUE_OVERFLOWED = -2 };
 class CollatzProcessorImpl {
  public:
@@ -24,7 +27,7 @@ class CollatzProcessorImpl {
   static const qsizetype cs_MaxSizeBeforeOverflow =
       std::numeric_limits<qsizetype>::max() / 3 + 1;
   static std::atomic<qsizetype> s_Elements;
-  static std::vector<std::pair<qsizetype, qsizetype>> s_ThreadResults;
+  static std::vector<ResultWrapper> s_ThreadResults;
   static timer::Timer s_Timer;
   static QList<std::atomic<qsizetype>*> s_Cache;
   static std::vector<std::jthread> s_ThreadPool;
