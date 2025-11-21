@@ -26,7 +26,6 @@ class CollatzProcessorImpl {
   static const qsizetype cs_CoresCount;
   static const qsizetype cs_MaxSizeBeforeOverflow =
       std::numeric_limits<qsizetype>::max() / 3 + 1;
-  static std::atomic<qsizetype> s_Elements;
   static std::vector<ResultWrapper> s_ThreadResults;
   static timer::Timer s_Timer;
   static QList<std::atomic<qsizetype>*> s_Cache;

@@ -7,7 +7,6 @@ const qsizetype CollatzProcessorImpl::cs_CoresCount =
     QThread::idealThreadCount();
 std::vector<std::jthread> CollatzProcessorImpl::s_ThreadPool{
     static_cast<size_t>(CollatzProcessorImpl::cs_CoresCount)};
-std::atomic<qsizetype> CollatzProcessorImpl::s_Elements = 1;
 
 timer::Timer CollatzProcessorImpl::s_Timer{};
 
@@ -48,7 +47,6 @@ std::pair<qsizetype, qsizetype> CollatzProcessorImpl::StartProcessing(
   for (int i = 0; i < CurrentThreadLimit; ++i) {
     s_ThreadPool[i].join();
   }
-  s_Elements = 1;
 
   if (stop.stop_requested() && is_Overflow)
     return std::make_pair(Signals::VALUE_OVERFLOWED, Signals::VALUE_OVERFLOWED);
@@ -64,13 +62,14 @@ std::pair<qsizetype, qsizetype> CollatzProcessorImpl::StartProcessing(
 void CollatzProcessorImpl::Run(std::stop_token stop,
                                const qsizetype CurrentUpperLimit,
                                const qsizetype IndexInResultsVector) {
-  qsizetype current_element = s_Elements++;
+  const qsizetype StepInCachedVector = IndexInResultsVector + 1;
+  qsizetype current_element = StepInCachedVector;
   qsizetype result_element = 1;
   qsizetype result_step_counter = 0;
 
   while (current_element <= CurrentUpperLimit) {
     if (current_element == 1) {
-      current_element = s_Elements++;
+      current_element += StepInCachedVector;
       continue;
     }
 
@@ -83,7 +82,7 @@ void CollatzProcessorImpl::Run(std::stop_token stop,
     }
 
     if (stop.stop_requested()) return;
-    current_element = s_Elements++;
+    current_element += StepInCachedVector;
   }
   this->SaveThreadResult(result_element, result_step_counter,
                          IndexInResultsVector);
