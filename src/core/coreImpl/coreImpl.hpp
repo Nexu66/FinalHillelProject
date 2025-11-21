@@ -14,12 +14,13 @@
 
 namespace Core {
 namespace impl {
-enum Signals { STOP = -1, OVERFLOW = -2 };
+enum Signals { STOP = -1, VALUE_OVERFLOWED = -2 };
 class CollatzProcessorImpl {
  public:
   bool is_Overflow = false;
   static const qsizetype s_CoresCount;
-  static const qsizetype s_MaxSize = std::numeric_limits<qsizetype>::max();
+  static const qsizetype s_MaxSizeBeforeOverflow =
+      std::numeric_limits<qsizetype>::max() / 3 + 1;
   static std::atomic<qsizetype> Elements;
   std::vector<std::pair<qsizetype, qsizetype>> ThreadResults;
   std::mutex ThreadResultsLock;

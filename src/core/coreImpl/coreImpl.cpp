@@ -6,7 +6,6 @@ const qsizetype CollatzProcessorImpl::s_CoresCount =
     QThread::idealThreadCount();
 std::vector<std::jthread> CollatzProcessorImpl::s_ThreadPool{
     static_cast<size_t>(CollatzProcessorImpl::s_CoresCount)};
-QHash<qsizetype, qsizetype> CollatzProcessorImpl::s_CalculatedValues;
 std::atomic<qsizetype> CollatzProcessorImpl::Elements = 2;
 
 void CollatzProcessorImpl::RequestStop() {
@@ -14,7 +13,7 @@ void CollatzProcessorImpl::RequestStop() {
 }
 
 bool CollatzProcessorImpl::WillOverflow(qsizetype current_element) {
-  if (current_element > this->s_MaxSize / 3 + 1) is_Overflow = true;
+  if (current_element > this->s_MaxSizeBeforeOverflow) is_Overflow = true;
   return is_Overflow;
 }
 
@@ -34,7 +33,7 @@ std::pair<qsizetype, qsizetype> CollatzProcessorImpl::StartProcessing(
   Elements = 2;
 
   if (stop.stop_requested() && is_Overflow)
-    return std::make_pair(Signals::OVERFLOW, Signals::OVERFLOW);
+    return std::make_pair(Signals::VALUE_OVERFLOWED, Signals::VALUE_OVERFLOWED);
   if (stop.stop_requested())
     return std::make_pair(Signals::STOP, Signals::STOP);
 
@@ -53,8 +52,7 @@ std::pair<qsizetype, qsizetype> CollatzProcessorImpl::CalculateCollatz(
   while (current_element != 1) {
     if (current_element % 2) {
       current_element = current_element * 3 + 1;
-      if (WillOverflow(current_element))
-        return std::make_pair(OVERFLOW, OVERFLOW);
+      if (WillOverflow(current_element)) this->RequestStop();
     } else {
       current_element /= 2;
     }
@@ -84,17 +82,12 @@ std::pair<qsizetype, qsizetype> CollatzProcessorImpl::FindFinalResult() {
 
 void CollatzProcessorImpl::Run(std::stop_token stop,
                                const qsizetype CurrentUpperLimit) {
-  // std::cout << "MAX: " << s_MaxSize << "\n";
   qsizetype current_element = Elements++;
   std::pair<qsizetype, qsizetype> local_thread_result{1, 0};
 
   std::pair<qsizetype, qsizetype> current_result;
   while (current_element <= CurrentUpperLimit) {
     current_result = CalculateCollatz(current_element);
-    if (current_result.first == Signals::OVERFLOW &&
-        current_result.second == Signals::OVERFLOW) {
-      RequestStop();
-    }
     if (stop.stop_requested()) return;
     if (current_result.second > local_thread_result.second)
       local_thread_result = current_result;
