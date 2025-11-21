@@ -8,6 +8,8 @@ target_link_libraries(main
         controller
 )
 
+target_link_options(main PRIVATE $<$<CONFIG:Debug>:-fsanitize=address>)
+
 install(TARGETS main
     BUNDLE  DESTINATION .
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

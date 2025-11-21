@@ -2,18 +2,27 @@
 
 namespace Core {
 namespace impl {
+
 const qsizetype CollatzProcessorImpl::cs_CoresCount =
     QThread::idealThreadCount();
 std::vector<std::jthread> CollatzProcessorImpl::s_ThreadPool{
     static_cast<size_t>(CollatzProcessorImpl::cs_CoresCount)};
-std::atomic<qsizetype> CollatzProcessorImpl::s_Elements = 2;
+std::atomic<qsizetype> CollatzProcessorImpl::s_Elements = 1;
+
+
+timer::Timer CollatzProcessorImpl::s_Timer{};
+
+QList<std::atomic<qsizetype>*> CollatzProcessorImpl::s_Cache{};
+
+CollatzProcessorImpl::CollatzProcessorImpl() {
+  s_Cache.reserve(1000000);
+  s_ThreadResults.resize(cs_CoresCount);
+}
+
+CollatzProcessorImpl::~CollatzProcessorImpl() { qDeleteAll(s_Cache); }
 
 std::vector<std::pair<qsizetype, qsizetype> >
     CollatzProcessorImpl::s_ThreadResults{};
-
-std::mutex CollatzProcessorImpl::s_ThreadResultsLock{};
-
-timer::Timer CollatzProcessorImpl::s_Timer{};
 
 void CollatzProcessorImpl::RequestStop() {
   s_ThreadPool.begin()->request_stop();
@@ -29,15 +38,20 @@ std::pair<qsizetype, qsizetype> CollatzProcessorImpl::StartProcessing(
     const qsizetype CurrentUpperLimit) {
   std::cout << "CURRENT CORES IN coreImpl: " << CurrentThreadLimit << "\n";
   s_Timer.StartTimer();
+  std::cout << "SIZE: " << s_Cache.size() << "\n";
+  const qsizetype current_size = s_Cache.size();
+  for (int i = 0; i < CurrentUpperLimit - current_size; ++i) {
+    s_Cache.append(new std::atomic<qsizetype>{0});
+  }
   for (int i = 0; i < CurrentThreadLimit; ++i) {
-    s_ThreadPool[i] =
-        std::jthread{&CollatzProcessorImpl::Run, this, stop, CurrentUpperLimit};
+    s_ThreadPool[i] = std::jthread{&CollatzProcessorImpl::Run, this, stop,
+                                   CurrentUpperLimit, i};
   }
 
   for (int i = 0; i < CurrentThreadLimit; ++i) {
     s_ThreadPool[i].join();
   }
-  s_Elements = 2;
+  s_Elements = 1;
 
   if (stop.stop_requested() && is_Overflow)
     return std::make_pair(Signals::VALUE_OVERFLOWED, Signals::VALUE_OVERFLOWED);
@@ -50,13 +64,34 @@ std::pair<qsizetype, qsizetype> CollatzProcessorImpl::StartProcessing(
 
   return res;
 }
+void CollatzProcessorImpl::Run(std::stop_token stop,
+                               const qsizetype CurrentUpperLimit,
+                               const qsizetype IndexInResultsVector) {
+  qsizetype current_element = s_Elements++;
+  qsizetype result_element = 1;
+  qsizetype result_step_counter = 0;
 
-std::pair<qsizetype, qsizetype> CollatzProcessorImpl::CalculateCollatz(
-    qsizetype current_element) {
+  while (current_element <= CurrentUpperLimit) {
+    if (s_Cache[current_element - 1]->load() == 0 && current_element != 1) {
+      CalculateCollatz(current_element);
+    }
+    if (result_step_counter < s_Cache[current_element - 1]->load()) {
+      result_step_counter = s_Cache[current_element - 1]->load();
+      result_element = current_element;
+    }
+
+    if (stop.stop_requested()) return;
+    current_element = s_Elements++;
+  }
+  this->SaveThreadResult(result_element, result_step_counter,
+                         IndexInResultsVector);
+  return;
+}
+
+void CollatzProcessorImpl::CalculateCollatz(qsizetype current_element) {
   qsizetype original_element = current_element;
   qsizetype step_counter = 0;
-  std::pair<qsizetype, qsizetype> local_result{current_element, step_counter};
-  while (current_element != 1) {
+  while (current_element > 1) {
     if (current_element % 2) {
       current_element = current_element * 3 + 1;
       if (WillOverflow(current_element)) this->RequestStop();
@@ -65,43 +100,28 @@ std::pair<qsizetype, qsizetype> CollatzProcessorImpl::CalculateCollatz(
     }
     ++step_counter;
   }
-  return std::make_pair(original_element, step_counter);
+  s_Cache[original_element - 1]->store(step_counter);
 }
 
-void CollatzProcessorImpl::SaveFinalThreadResult(
-    std::pair<qsizetype, qsizetype> final_thread_result) {
-  std::lock_guard<std::mutex> write_access_lock{s_ThreadResultsLock};
-  s_ThreadResults.push_back(final_thread_result);
-  // for (auto p : ThreadResults) {
-  //   std::cout << "Val: " << p.first << " Count: " << p.second << "\n";
-  // }
+void CollatzProcessorImpl::SaveThreadResult(
+    qsizetype result_element, qsizetype result_step_count,
+    const qsizetype IndexInResultsVector) {
+  s_ThreadResults[IndexInResultsVector] =
+      std::make_pair(result_element, result_step_count);
 }
 
 std::pair<qsizetype, qsizetype> CollatzProcessorImpl::FindFinalResult() {
-  auto result = *std::ranges::max_element(
-      s_ThreadResults, [](const std::pair<qsizetype, qsizetype> first_el,
-                          const std::pair<qsizetype, qsizetype> second_el) {
-        return first_el.second < second_el.second;
-      });
-  s_ThreadResults.clear();
-  return result;
-}
-
-void CollatzProcessorImpl::Run(std::stop_token stop,
-                               const qsizetype CurrentUpperLimit) {
-  qsizetype current_element = s_Elements++;
-  std::pair<qsizetype, qsizetype> local_thread_result{1, 0};
-
-  std::pair<qsizetype, qsizetype> current_result;
-  while (current_element <= CurrentUpperLimit) {
-    current_result = CalculateCollatz(current_element);
-    if (stop.stop_requested()) return;
-    if (current_result.second > local_thread_result.second)
-      local_thread_result = current_result;
-
-    current_element = s_Elements++;
+  qsizetype largest_count = 0;
+  qsizetype number = 1;
+  for (int i = 0; i < s_ThreadResults.size(); ++i) {
+    if (s_ThreadResults[i].second > largest_count) {
+      largest_count = s_ThreadResults[i].second;
+      number = s_ThreadResults[i].first;
+    }
   }
-  SaveFinalThreadResult(local_thread_result);
+  s_ThreadResults.assign(s_ThreadResults.size(), std::make_pair(0, 0));
+  return std::make_pair(number, largest_count);
 }
+
 }  // namespace impl
 }  // namespace Core

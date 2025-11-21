@@ -17,26 +17,29 @@ namespace impl {
 enum Signals { STOP = -1, VALUE_OVERFLOWED = -2 };
 class CollatzProcessorImpl {
  public:
+  CollatzProcessorImpl();
+  ~CollatzProcessorImpl();
   bool is_Overflow = false;
   static const qsizetype cs_CoresCount;
   static const qsizetype cs_MaxSizeBeforeOverflow =
       std::numeric_limits<qsizetype>::max() / 3 + 1;
   static std::atomic<qsizetype> s_Elements;
   static std::vector<std::pair<qsizetype, qsizetype>> s_ThreadResults;
-  static std::mutex s_ThreadResultsLock;
-  static std::vector<std::jthread> s_ThreadPool;
   static timer::Timer s_Timer;
+  static QList<std::atomic<qsizetype>*> s_Cache;
+  static std::vector<std::jthread> s_ThreadPool;
 
   void RequestStop();
   bool WillOverflow(qsizetype current_element);
   std::pair<qsizetype, qsizetype> StartProcessing(
       std::stop_token stop, const qsizetype CurrentThreadLimit,
       const qsizetype CurrentUpperLimit);
-  std::pair<qsizetype, qsizetype> CalculateCollatz(qsizetype current_element);
-  void SaveFinalThreadResult(
-      std::pair<qsizetype, qsizetype> final_thread_result);
+  void CalculateCollatz(qsizetype current_element);
+  void SaveThreadResult(qsizetype result_element, qsizetype result_step_count,
+                        const qsizetype IndexInResultsVector);
   std::pair<qsizetype, qsizetype> FindFinalResult();
-  void Run(std::stop_token stop, const qsizetype CurrentUpperLimit);
+  void Run(std::stop_token stop, const qsizetype CurrentUpperLimit,
+           const qsizetype IndexInResultsVector);
 };
 
 }  // namespace impl
