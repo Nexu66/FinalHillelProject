@@ -38,8 +38,6 @@ class CollatzProcessorImpl {
       std::stop_token stop, const qsizetype CurrentThreadLimit,
       const qsizetype CurrentUpperLimit);
   qsizetype CalculateCollatz(qsizetype current_element, qsizetype step_counter);
-  void SaveThreadResult(qsizetype result_element, qsizetype result_step_count,
-                        const qsizetype IndexInResultsVector);
   std::pair<qsizetype, qsizetype> FindFinalResult();
   void Run(std::stop_token stop, const qsizetype CurrentUpperLimit,
            const qsizetype IndexInResultsVector);
