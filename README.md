@@ -55,9 +55,11 @@ cmake ..
   -DCMAKE_PREFIX_PATH="/path/to/Qt/lib/cmake"   # adjust to your Qt installation
 ```
 3. Build
+For Windows:
 ```bash
 cmake --build . --config Release
 ```
+For Unix:
 ```bash
 cmake --build .
 ```
