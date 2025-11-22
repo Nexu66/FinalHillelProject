@@ -25,7 +25,7 @@ The app displays the number that produced the longest Collatz chain, the length 
 
 Tech stack
 
-- C++ (modern C++)
+- C++
 
 - Qt (Qt Widgets) — UI
 
@@ -42,12 +42,12 @@ Qt development libraries (Qt6.5+). The project uses Qt Widgets — ensure the Qt
 Below are general, cross-platform instructions that work on Linux/macOS and Windows.
 
 1. Clone the repository
-```
+```bash
 git clone https://github.com/Nexu66/Collatz-Sequence-Calculator.git
 cd Collatz-Sequence-Calculator
 ```
 2. Create a build directory and configure with CMake
-```Unix
+```bash
 mkdir build
 cd build
 cmake ..
@@ -55,14 +55,14 @@ cmake ..
   -DCMAKE_PREFIX_PATH="/path/to/Qt/lib/cmake"   # adjust to your Qt installation
 ```
 3. Build
-```Windows
+```bash
 cmake --build . --config Release
 ```
-```Unix
+```bash
 cmake --build .
 ```
 4. Run 
-```
+```bash
 ./src/app/main
 ```
 
@@ -71,7 +71,7 @@ cmake --build .
 This project uses GoogleTest for unit testing. Tests are placed under the tests/ directory and are integrated in the CMake configuration.
 
 ## Project structure
-/
+```bash
 ├── build/
 │   ├── MyKit-Debug/         
 │   └── MyKit-Release/       
@@ -104,3 +104,4 @@ This project uses GoogleTest for unit testing. Tests are placed under the tests/
 │       └── Timer.hpp
 ├── tests/                    # GoogleTest unit tests
 └── (other build and metadata files)
+```
