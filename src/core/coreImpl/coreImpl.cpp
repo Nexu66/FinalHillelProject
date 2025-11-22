@@ -19,7 +19,8 @@ CollatzProcessorImpl::CollatzProcessorImpl() {
 
 CollatzProcessorImpl::~CollatzProcessorImpl() { delete[] s_Cache; }
 
-std::vector<ResultWrapper> CollatzProcessorImpl::s_ThreadResults{};
+std::vector<std::pair<qsizetype, qsizetype>>
+    CollatzProcessorImpl::s_ThreadResults{};
 
 void CollatzProcessorImpl::RequestStop() {
   s_ThreadPool.begin()->request_stop();
@@ -60,10 +61,8 @@ void CollatzProcessorImpl::Run(std::stop_token stop,
                                const qsizetype IndexInResultsVector) {
   const qsizetype StepInCachedVector = IndexInResultsVector + 1;
   qsizetype current_element = CurrentUpperLimit + 1 - StepInCachedVector;
-  qsizetype& result_element =
-      s_ThreadResults[IndexInResultsVector].result.first;
-  qsizetype& result_step_counter =
-      s_ThreadResults[IndexInResultsVector].result.second;
+  qsizetype& result_element = s_ThreadResults[IndexInResultsVector].first;
+  qsizetype& result_step_counter = s_ThreadResults[IndexInResultsVector].second;
 
   while (current_element > 1) {
     if (s_Cache[current_element - 1].load() == 0) {
@@ -106,12 +105,13 @@ std::pair<qsizetype, qsizetype> CollatzProcessorImpl::FindFinalResult() {
   qsizetype largest_count = 0;
   qsizetype number = 1;
   for (int i = 0; i < s_ThreadResults.size(); ++i) {
-    if (s_ThreadResults[i].result.second > largest_count) {
-      largest_count = s_ThreadResults[i].result.second;
-      number = s_ThreadResults[i].result.first;
+    if (s_ThreadResults[i].second > largest_count) {
+      largest_count = s_ThreadResults[i].second;
+      number = s_ThreadResults[i].first;
     }
   }
-  s_ThreadResults.assign(s_ThreadResults.size(), ResultWrapper{});
+  s_ThreadResults.assign(s_ThreadResults.size(),
+                         std::pair<qsizetype, qsizetype>{0, 0});
   return std::make_pair(number, largest_count);
 }
 
