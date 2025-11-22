@@ -8,16 +8,16 @@
 namespace Ctrl {
 class Controller : public QObject {
   Q_OBJECT
-  QScopedPointer<Ui::View> m_ui;
-  QScopedPointer<Core::Model> m_mod;
-  std::jthread ModelThread;
+  QScopedPointer<Ui::View> m_pView;
+  QScopedPointer<Core::Model> m_pModel;
+  std::jthread m_ModelThread;
 
  private slots:
   void LaunchModel(qsizetype CurrentCoresSelected, qsizetype CurrentUpperLimit);
   void StopAlgorithm();
 
  public:
-  Controller(Ui::View* ui, Core::Model* mod);
+  Controller(Ui::View* pView, Core::Model* pModel);
   void show() const noexcept;
 
 };

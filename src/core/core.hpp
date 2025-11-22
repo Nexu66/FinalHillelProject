@@ -6,11 +6,12 @@ namespace Core {
 
 class CollatzProcessor : public Model {
   Q_OBJECT
-  impl::CollatzProcessorImpl impl;
+  impl::CollatzProcessorImpl m_Impl;
 
  private:
-  void StartProcessing(std::stop_token stop, qsizetype CurrentCoresSelected,
-                       qsizetype CurrentUpperLimit) noexcept override;
+  void StartProcessing(const std::stop_token StopToken,
+                       const qsizetype CurrentCoresSelected,
+                       const qsizetype CurrentUpperLimit) noexcept override;
 };
 
 }  // namespace Core
