@@ -10,7 +10,7 @@ target_link_libraries(main
         core
 )
 
-target_link_options(main PRIVATE $<$<CONFIG:Debug>:-fsanitize=address>)
+# target_link_options(main PRIVATE $<$<CONFIG:Debug>:-fsanitize=address>)
 
 install(TARGETS main
     BUNDLE  DESTINATION .
